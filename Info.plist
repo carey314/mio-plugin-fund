@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>zh_CN</string>
+    <key>CFBundleExecutable</key>
+    <string>FundPlugin</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.mioisland.plugin.fund</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>看盘侠</string>
+    <key>CFBundlePackageType</key>
+    <string>BNDL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.2.0</string>
+    <key>CFBundleVersion</key>
+    <string>2</string>
+    <key>NSPrincipalClass</key>
+    <string>FundPlugin.FundPlugin</string>
+    <!--
+        Panel size: 380×580.
+          - 380 wide so the island isn't too thick.
+          - 580 tall = 40pt notch reservation + 540pt of card content
+            (hero + tabs + list/chart + footer). Mirrors the Music
+            Player layout pattern: dedicate the top band for the
+            physical notch + host's floating back-chevron, then put
+            actual plugin chrome below.
+        Host clamp is [280-1200] × [120-900] so we sit comfortably.
+    -->
+    <key>MioPluginPreferredWidth</key>
+    <integer>380</integer>
+    <key>MioPluginPreferredHeight</key>
+    <integer>580</integer>
+</dict>
+</plist>
