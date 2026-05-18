@@ -54,6 +54,12 @@ struct ExpandedView: View {
                 cornerRadii: .init(topLeading: 0, bottomLeading: 28, bottomTrailing: 28, topTrailing: 0)
             )
         )
+        // Mount the toast + confirm layers at the plugin root so any
+        // view in the tree can call ToastController.shared.success(...)
+        // or `await ConfirmController.shared.ask(...)` without threading
+        // state through props.
+        .toastOverlay()
+        .confirmOverlay()
         .onAppear {
             store.start()
             Task { await store.refreshNow() }

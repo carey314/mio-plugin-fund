@@ -113,6 +113,13 @@ struct AddView: View {
                             if !store.watchlist.contains(hit.code) {
                                 store.watchlist.add(hit)
                                 Task { await store.refreshNow() }
+                                // Operation feedback so the user knows the
+                                // tap landed — without this the only signal
+                                // is the row's checkmark state flipping,
+                                // which is easy to miss when scrolling.
+                                ToastController.shared.success("已添加「\(hit.name)」到自选")
+                            } else {
+                                ToastController.shared.info("「\(hit.name)」已在自选中")
                             }
                         }
                     }

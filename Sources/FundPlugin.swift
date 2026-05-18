@@ -13,7 +13,7 @@ final class FundPlugin: NSObject, MioPlugin {
     var id: String { "fund" }
     var name: String { "看盘侠" }
     var icon: String { "chart.line.uptrend.xyaxis" }
-    var version: String { "0.2.0" }
+    var version: String { "0.3.0" }
 
     func activate() {
         FundDebugLog.write("plugin activate")
