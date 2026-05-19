@@ -68,7 +68,19 @@ actor ETFClient {
     static func isETFCode(_ code: String) -> Bool {
         guard code.count == 6, let n = Int(code) else { return false }
         let prefix = n / 1000
+        // P0 fix (2026-05-19 review): the prior `150...199` range was
+        // too wide — it caught LOF codes that aren't ETFs:
+        //   161xxx 兴全 LOF / 162xxx 黄金 LOF / 163xxx 招商 LOF
+        //   165xxx 银华 LOF / 166xxx 中欧 LOF / 167xxx 中海 LOF
+        //   168xxx, 169xxx 多家 LOF
+        // LOFs trade by 1-day NAV pricing, not by ETF intraday quote
+        // ticks. Routing them through ETFClient would surface stale
+        // or wrong-shaped data on the holding row.
+        // Explicit-deny the LOF prefixes; keep everything else in the
+        // legacy range routing for backwards compat.
         switch prefix {
+        case 161, 162, 163, 165, 166, 167, 168, 169:
+            return false
         case 510...599, 150...199:
             return true
         default:
