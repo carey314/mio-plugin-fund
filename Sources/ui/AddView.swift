@@ -136,7 +136,11 @@ struct AddView: View {
         do {
             hits = try await FundClient.shared.search(q)
         } catch {
+            // P0 fix (2026-05-19 review): silent swallow used to make
+            // a 15s network timeout look like "no funds matched". Surface
+            // the actual failure so users know it's network, not empty.
             hits = []
+            ToastController.shared.error("搜索失败，请检查网络后重试")
         }
     }
 }
