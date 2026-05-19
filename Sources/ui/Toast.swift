@@ -61,7 +61,12 @@ final class ToastController: ObservableObject {
             toasts.append(item)
         }
         Task { [weak self] in
-            try? await Task.sleep(nanoseconds: UInt64(self?.durationSeconds ?? 2.6) * 1_000_000_000)
+            // BUG fix (2026-05-19 review): `UInt64(2.6)` truncates to 2,
+            // so the previous `UInt64(dur) * 1_000_000_000` slept 2.0s
+            // instead of 2.6s — every toast vanished 0.6s early. Do the
+            // multiply first, then cast.
+            let dur = self?.durationSeconds ?? 2.6
+            try? await Task.sleep(nanoseconds: UInt64(dur * 1_000_000_000))
             await MainActor.run { [weak self] in
                 self?.dismiss(item.id)
             }
