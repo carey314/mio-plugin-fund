@@ -113,6 +113,13 @@ struct AddView: View {
                             if !store.watchlist.contains(hit.code) {
                                 store.watchlist.add(hit)
                                 Task { await store.refreshNow() }
+                                // Operation feedback so the user knows the
+                                // tap landed — without this the only signal
+                                // is the row's checkmark state flipping,
+                                // which is easy to miss when scrolling.
+                                ToastController.shared.success("已添加「\(hit.name)」到自选")
+                            } else {
+                                ToastController.shared.info("「\(hit.name)」已在自选中")
                             }
                         }
                     }
@@ -129,7 +136,11 @@ struct AddView: View {
         do {
             hits = try await FundClient.shared.search(q)
         } catch {
+            // P0 fix (2026-05-19 review): silent swallow used to make
+            // a 15s network timeout look like "no funds matched". Surface
+            // the actual failure so users know it's network, not empty.
             hits = []
+            ToastController.shared.error("搜索失败，请检查网络后重试")
         }
     }
 }

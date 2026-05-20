@@ -74,8 +74,25 @@ struct HoldingsView: View {
                                     editingCode = (editingCode == f.code) ? nil : f.code
                                 },
                                 onRemove: {
-                                    if editingCode == f.code { editingCode = nil }
-                                    store.watchlist.remove(code: f.code)
+                                    Task { @MainActor in
+                                        // Danger confirm before destructive remove.
+                                        // The user's only "trash" affordance is the
+                                        // hover-only ✕ button so a wrong click is
+                                        // possible — surface a clear ack-or-bail.
+                                        let ok = await ConfirmController.shared.ask(
+                                            title: "移除自选基金?",
+                                            message: "「\(f.name)」(\(f.code)) 将从自选中移除,已填写的持仓份额与成本也会一并删除。",
+                                            confirmLabel: "移除",
+                                            cancelLabel: "取消",
+                                            danger: true
+                                        )
+                                        guard ok else { return }
+                                        if editingCode == f.code { editingCode = nil }
+                                        withAnimation(.spring(response: 0.38, dampingFraction: 0.85)) {
+                                            store.watchlist.remove(code: f.code)
+                                        }
+                                        ToastController.shared.success("已移除「\(f.name)」")
+                                    }
                                 }
                             )
                             if editingCode == f.code {
@@ -86,16 +103,33 @@ struct HoldingsView: View {
                                             code: f.code, shares: shares, costNav: cost
                                         )
                                         editingCode = nil
+                                        // Bias the message toward what the user
+                                        // just did — saving with values is "已保存
+                                        // 持仓",saving with both cleared is "已清
+                                        // 除持仓"。Either path lands here so we
+                                        // disambiguate by inputs.
+                                        if shares == nil && cost == nil {
+                                            ToastController.shared.info("已清除「\(f.name)」的持仓")
+                                        } else {
+                                            ToastController.shared.success("已保存「\(f.name)」的持仓")
+                                        }
                                     },
                                     onCancel: { editingCode = nil }
                                 )
                                 .padding(.horizontal, 4)
+                                .transition(.opacity.combined(with: .move(edge: .top)))
                             }
                         }
                         .padding(.horizontal, 8)
+                        .transition(.asymmetric(
+                            insertion: .scale(scale: 0.96).combined(with: .opacity),
+                            removal: .move(edge: .leading).combined(with: .opacity)
+                        ))
                     }
                 }
                 .padding(.bottom, 4)
+                .animation(.spring(response: 0.38, dampingFraction: 0.85), value: store.watchlist.funds.map(\.code))
+                .animation(.easeInOut(duration: 0.2), value: editingCode)
             }
         }
     }
